@@ -1,19 +1,23 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
 public class CameraBehavior : MonoBehaviour
 {
-    enum VisualizationMode
-    {
-        Overhead = 1,
-        Center = -1
-    }
-
+    enum VisualizationMode { Overhead = 1, Center = -1 }
     VisualizationMode _visualizationMode = VisualizationMode.Overhead;
 
     [SerializeField] Transform _cameraOffsetPoint;
+    Camera _cam;
+    [SerializeField] float _centerFOV = 80.0f;
+    [SerializeField] float _overheadFOV = 60.0f;
     
     bool _inCoroutine;
+
+    void Awake()
+    {
+        _cam = GetComponent<Camera>();
+    }
 
     void Update()
     {
@@ -55,6 +59,7 @@ public class CameraBehavior : MonoBehaviour
             
             transform.position = Vector3.Lerp(initPosition, transform.parent.position, currentTransitionPoint);
             transform.rotation = Quaternion.Lerp(initRotation, _cameraOffsetPoint.rotation * Quaternion.Euler(0, 180, 0), currentTransitionPoint);
+            _cam.fieldOfView = Mathf.Lerp(_overheadFOV, _centerFOV, currentTransitionPoint);
             
             elapsedTime += Time.deltaTime;
             
@@ -63,6 +68,7 @@ public class CameraBehavior : MonoBehaviour
 
         transform.position = transform.parent.position;
         transform.LookAt(_cameraOffsetPoint);
+        _cam.fieldOfView = _centerFOV;
 
         _visualizationMode = VisualizationMode.Center;
 
@@ -82,6 +88,7 @@ public class CameraBehavior : MonoBehaviour
             
             transform.position = Vector3.Lerp(initPosition, _cameraOffsetPoint.position, currentTransitionPoint);
             transform.rotation = Quaternion.Lerp(initRotation, _cameraOffsetPoint.rotation, currentTransitionPoint);
+            _cam.fieldOfView = Mathf.Lerp(_centerFOV, _overheadFOV, currentTransitionPoint);
             
             elapsedTime += Time.deltaTime;
             
@@ -90,6 +97,7 @@ public class CameraBehavior : MonoBehaviour
 
         transform.position = _cameraOffsetPoint.position;
         transform.rotation = _cameraOffsetPoint.rotation;
+        _cam.fieldOfView = _overheadFOV;
         
         _visualizationMode = VisualizationMode.Overhead;
 

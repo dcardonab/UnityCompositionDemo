@@ -3,53 +3,57 @@ using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
+using UnityEngine.Audio;
+using UnityEngine.Pool;
 
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance;
     
-    float[] _noteMultipliers = new float[12];
-    
-    Dictionary<string, int[]> _scales = new() {
-        {"Ionian", new []{0, 2, 4, 5, 7, 9, 11}},
-        {"Dorian", new []{0, 2, 3, 5, 7, 9, 10}},
-        {"Phrygian", new []{0, 1, 3, 5, 7, 8, 10}},
-        {"Lydian", new []{0, 2, 4, 6, 7, 9, 11}},
-        {"Mixolydian", new []{0, 2, 4, 5, 7, 9, 10}},
-        {"Aeolian", new []{0, 2, 3, 5, 7, 8, 10}},
-        {"Locrian", new []{0, 1, 3, 5, 6, 8, 10}},
-        {"Whole Tone", new []{0, 2, 4, 6, 8, 10}},
-        {"1st Pentatonic", new []{0, 3, 5, 7, 10}},
-        {"2nd Pentatonic", new []{0, 2, 4, 7, 9}},
-        {"3rd Pentatonic", new []{0, 2, 5, 7, 10}},
-        {"4th Pentatonic", new []{0, 3, 5, 8, 10}},
-        {"5th Pentatonic", new []{0, 2, 5, 7, 9}}
-    };
+    private float[] _noteMultipliers = new float[12];
 
     public int[] CurrentScale;
     
-    int _scaleIndex;
-    public int ScaleIndex
+    Constants.Scale _selectedScale;
+    Constants.Scale SelectedScale
     {
-        get => _scaleIndex;
+        get => _selectedScale;
         set
         {
-            int index = value;
+            Constants.Scale index = value;
             
-            if (index >= _scales.Count)
+            if ((int)index >= Constants.Scales.Count)
                 index = 0;
-            else if (index < 0)
-                index = _scales.Count - 1;
+            else if ((int)index < 0)
+                index = Constants.Scales.ElementAt(Constants.Scales.Count - 1).Key;
             
-            _scaleIndex = index;
-            CurrentScale = _scales.ElementAt(ScaleIndex).Value;
+            _selectedScale = index;
+            CurrentScale = Constants.Scales[_selectedScale];
         }
     }
     
-    bool _inCoroutine;
+    bool _inTransition;
     public float TransitionTime = 2.0f;
+
+    [Header("AudioSource Settings")]
+    [SerializeField] AudioClip _audioClip;
+    [SerializeField] AudioMixerGroup _mixerGroup;
     
-    AudioSource _source;
+    [Header("AudioSource Pool")]
+    public ObjectPool<AudioSource> AudioSourcePool;
+    List<AudioSource> _activeAudioSources = new List<AudioSource>();
+    [SerializeField] int MaxAudioSources = 1000;
+    
+    [SerializeField] AudioSource _audioSourcePrefab;
+    
+    [Header("Spectrum Data")]
+    [SerializeField] int _numFftBands = 16;
+    float[] _fftBandRangeFrequencies;
+    [SerializeField] int _vectorSize = 1024;
+    [SerializeField] FFTWindow _fftWindowType = FFTWindow.BlackmanHarris;
+    
+    public AudioChannelData Left; 
+    public AudioChannelData Right; 
     
     void Awake()
     {
@@ -57,63 +61,141 @@ public class AudioManager : MonoBehaviour
             Destroy(this);
         else
             Instance = this;
+
+        AudioSourcePool = new ObjectPool<AudioSource>(
+            CreatePooledAudioSource,
+            OnGetAudioSource,
+            OnReleaseAudioSource,
+            OnDestroyAudioSource,
+            false,
+            MaxAudioSources,
+            MaxAudioSources);
         
         InitNoteMultipliers();
+        InitFftBandRangeFrequencies();
+
+        Left = new AudioChannelData(_vectorSize, 0, _fftWindowType, _fftBandRangeFrequencies);
+        Right = new AudioChannelData(_vectorSize, 1, _fftWindowType, _fftBandRangeFrequencies);
     }
     
     void Start()
     {
-        _source = GetComponent<AudioSource>();
-        ScaleIndex = 1;
+        SelectedScale = Constants.Scale.Dorian;
     }
     
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.W))
-            ScaleIndex++;
+            SelectedScale++;
         
         if (Input.GetKeyDown(KeyCode.S))
-            ScaleIndex--;
+            SelectedScale--;
 
-        if (Input.GetKeyDown(KeyCode.M) && !_inCoroutine)
+        if (Input.GetKeyDown(KeyCode.M) && !_inTransition)
         {
-            _inCoroutine = true;
-            StartCoroutine(TransitionPlaybackMode());
+            _inTransition = true;
+            foreach (AudioSource source in _activeAudioSources)
+            {
+                StartCoroutine(TransitionPlaybackMode(source));
+            }
         }
     }
 
+    /********************* INITS *********************/
     void InitNoteMultipliers()
     {
         float twelfthRoot = Mathf.Pow(2.0f, 1.0f / 12.0f);
 
-        for (int i = 0; i < _noteMultipliers.Length; i++)
-            _noteMultipliers[i] = Mathf.Pow(twelfthRoot, i);
+        _noteMultipliers = _noteMultipliers
+            .Select((_, i) => Mathf.Pow(twelfthRoot, i))
+            .ToArray();
     }
 
-    public void PlayNote(int note, float multiplier)
+    void InitFftBandRangeFrequencies()
     {
-        _source.pitch = _noteMultipliers[CurrentScale[note % CurrentScale.Length]] * multiplier;
-        _source.PlayOneShot(_source.clip);
+        float freqMin = 20.0f;
+        float freqMax = AudioSettings.outputSampleRate * 0.5f;
+        
+        // Ratio for each step in logarithmic scaling
+        float ratio = Mathf.Pow(freqMax / freqMin, 1.0f / _numFftBands);
+
+        _fftBandRangeFrequencies = new float[_numFftBands + 1];
+        _fftBandRangeFrequencies[0] = freqMin;
+
+        _fftBandRangeFrequencies = _fftBandRangeFrequencies
+            .Select(
+                (freq, i) => i == 0
+                    ? freq
+                    : _fftBandRangeFrequencies[i - 1] * ratio)
+            .ToArray();
     }
 
-    IEnumerator TransitionPlaybackMode()
+    /********************* POOL METHODS *********************/
+    AudioSource CreatePooledAudioSource()
     {
-        float initialValue = _source.spatialBlend;
-        float destinationValue = 1.0f - _source.spatialBlend;
+        AudioSource instance = Instantiate(_audioSourcePrefab, Vector3.zero, Quaternion.identity);
+        instance.gameObject.SetActive(false);
+
+        return instance;
+    }
+    
+    void OnGetAudioSource(AudioSource instance)
+    {
+        instance.gameObject.SetActive(true);
+        instance.transform.SetParent(transform, true);
+        _activeAudioSources.Add(instance);
+    }
+
+    void OnReleaseAudioSource(AudioSource instance)
+    {
+        instance.gameObject.SetActive(false);
+    }
+
+    void OnDestroyAudioSource(AudioSource instance)
+    {
+        Destroy(instance.gameObject);
+    }
+
+    void ReleaseAudioSource(AudioSource instance)
+    {
+        AudioSourcePool.Release(instance);
+        _activeAudioSources.Remove(instance);
+    }
+    
+    /********************* METHODS *********************/
+    public IEnumerator PlayNote(NotePlayer tilePlayer, int note, float multiplier, Transform tileTransform)
+    {
+        tilePlayer.SourceAssigned = true;
+        
+        tilePlayer.transform.position = tileTransform.position;
+        
+        tilePlayer.Source.pitch = _noteMultipliers[CurrentScale[note % CurrentScale.Length]] * multiplier;
+        tilePlayer.Source.PlayOneShot(tilePlayer.Source.clip);
+        
+        yield return new WaitWhile(() => tilePlayer.Source.isPlaying || _inTransition);
+        
+        tilePlayer.SourceAssigned = false;
+        ReleaseAudioSource(tilePlayer.Source);
+    }
+    
+    IEnumerator TransitionPlaybackMode(AudioSource source)
+    {
+        float initialValue = source.spatialBlend;
+        float destinationValue = 1.0f - source.spatialBlend;
         
         float elapsedTime = 0.0f;
-
+    
         while (elapsedTime <= TransitionTime)
         {
-            _source.spatialBlend = Mathf.Lerp(initialValue, destinationValue, elapsedTime / TransitionTime);
+            source.spatialBlend = Mathf.Lerp(initialValue, destinationValue, elapsedTime / TransitionTime);
             
             elapsedTime += Time.deltaTime;
             
             yield return null;
         }
-
-        _source.spatialBlend = Mathf.Round(_source.spatialBlend);
-
-        _inCoroutine = false;
+    
+        source.spatialBlend = Mathf.Round(source.spatialBlend);
+    
+        _inTransition = false;
     }
 }
