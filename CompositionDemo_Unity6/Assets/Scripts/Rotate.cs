@@ -18,11 +18,13 @@ public class Rotate : MonoBehaviour
     [SerializeField] private TransformSpace _transformationSpace = TransformSpace.Self;
     
     [SerializeField] float _speed = 5.0f;
-    
+
     void Update()
     {
         transform.Rotate(
-            0, _speed * (int)_direction * Time.deltaTime, 0,
+            0,
+            InputManager.Instance.MousePosition * _speed * (int)_direction * Time.deltaTime,
+            0,
             _transformationSpace == TransformSpace.Self ? UnityEngine.Space.Self : UnityEngine.Space.World);
     }
 }

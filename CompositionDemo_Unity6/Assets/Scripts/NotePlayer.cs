@@ -1,14 +1,12 @@
-using Unity.VisualScripting;
+using System.Collections.Generic;
 using UnityEngine;
-using Update = UnityEngine.PlayerLoop.Update;
 
 public class NotePlayer : MonoBehaviour
 {
     public int NoteIndex;
     public float Multiplier;
 
-    public AudioSource Source;
-    public bool SourceAssigned;
+    public List<AudioSource> Sources = new List<AudioSource>();
     private float[] _samples = new float[1024];
     
     Material _material;
@@ -31,35 +29,39 @@ public class NotePlayer : MonoBehaviour
 
     void Update()
     {
-        if (SourceAssigned)
+        if (Sources.Count > 0)
         {
-            Source.GetOutputData(_samples, 0);
-            
-            float rms = Utilities.GetRootMeanSquared(_samples);
-            float intensity = Utilities.Map(
-                rms,
-                -80.0f, 0.0f,
-                0.01f, 10.0f,
-                clamp: true
-            );
-            intensity = Mathf.Pow(2, intensity);
-            intensity = Utilities.Map(
-                intensity,
-                0.0f, 1024.0f,
-                0.0f, 100.0f
-            );
-            
-            Debug.Log(intensity);
-            
-            _material.SetColor(_glowColorID, intensity * _emissionColor);
+            // The ^ operator is used to specify "From End"
+            AudioSource lastSource = Sources[^1];
+            if (lastSource.isPlaying)
+            {
+                lastSource.GetOutputData(_samples, 0);
+                
+                float rms = Utilities.GetRootMeanSquared(_samples);
+                float intensity = Utilities.Map(
+                    rms,
+                    -80.0f, 0.0f,
+                    0.01f, 10.0f,
+                    clamp: true
+                );
+                intensity = Mathf.Pow(2, intensity);
+                intensity = Utilities.Map(
+                    intensity,
+                    0.0f, 1024.0f,
+                    0.0f, 100.0f
+                );
+                
+                _material.SetColor(_glowColorID, intensity * _emissionColor);
+            }
         }
     }
 
     void OnTriggerEnter(Collider other)
     {
-        Source = AudioManager.Instance.AudioSourcePool.Get();
-        
-        StartCoroutine(AudioManager.Instance.PlayNote(this, NoteIndex, Multiplier, transform));
+        AudioSource source = AudioManager.Instance.AudioSourcePool.Get();
+        Sources.Add(source);
+
+        StartCoroutine(AudioManager.Instance.PlayNote(this, Sources.Count - 1, NoteIndex, Multiplier, other));
 
         NoteTileParticleSystem particleSystem = SpawnerParticleSystem.Instance.GetParticleSystem();
         if (particleSystem != null)
@@ -67,6 +69,20 @@ public class NotePlayer : MonoBehaviour
             particleSystem.transform.position = transform.position;
             ParticleSystem.MainModule settings = particleSystem.GetComponent<ParticleSystem>().main;
             settings.startColor = _material.GetColor(_baseColorID);
+        }
+    }
+
+    public void RemoveSource(int index)
+    {
+        if (index >= 0 && index < Sources.Count)
+        {
+            AudioSource source = Sources[index];
+
+            if (source != null)
+            {
+                AudioManager.Instance.ReleaseAudioSource(source);
+                Sources.RemoveAt(index);
+            }
         }
     }
 }

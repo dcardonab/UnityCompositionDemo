@@ -85,6 +85,28 @@ AudioMixerEffectController:
   m_SendTarget: {fileID: 0}
   m_EnableWetMix: 0
   m_Bypass: 0
+--- !u!244 &-4861063002198153103
+AudioMixerEffectController:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_EffectID: 68a0953d1b483470c90e7ef592d70155
+  m_EffectName: Compressor
+  m_MixLevel: 66434860c04444b7eaed268f313a41a8
+  m_Parameters:
+  - m_ParameterName: Threshold
+    m_GUID: 3d6d806b758474103be2719577881a09
+  - m_ParameterName: Attack
+    m_GUID: 2c07303983fb248a5adab7b870197ee7
+  - m_ParameterName: Release
+    m_GUID: 09e2cbb3195e34f8e810d124cd48c03b
+  - m_ParameterName: Make up gain
+    m_GUID: b3f6f2de911cf4ce6859ef0ed48fa807
+  m_SendTarget: {fileID: 0}
+  m_EnableWetMix: 0
+  m_Bypass: 0
 --- !u!244 &-4302831673904192812
 AudioMixerEffectController:
   m_ObjectHideFlags: 3
@@ -251,16 +273,19 @@ AudioMixerSnapshotController:
   m_FloatValues:
     886b9070263b34e648dd66c455f2c465: -10000
     f39147b04d1364d23a198161080a4f1b: 0
-    1cbe18918515d4c788aeebb85bc6e404: -20
+    1cbe18918515d4c788aeebb85bc6e404: -10
     3878c4d145a604d459b4ae746e9638a9: -10000
     3aa4d343dddaa4458bb6154033caed20: 0
     4bf69ea3c9449452780de3657b2f4a05: 0
+    09e2cbb3195e34f8e810d124cd48c03b: 110
     dd01f7849b3b341e685ea20645bb2331: -20
     1b14e3f4c71b1404695e288b26ce5cde: -30
     d8931a45d6ec341fab38bd1cc3fda3d5: 8.6
+    2c07303983fb248a5adab7b870197ee7: 20
     b2bef959e780e4c34a9a472babaf207d: 0.624
     6ff40dd96f7004713af31489cd8c337c: 0
     3f87379a4750543768268da17a99d32f: 1000
+    3d6d806b758474103be2719577881a09: -10
     23b9b19b54e3149bb88cc71eabf9eb6a: 0.168
     f97fdcdc483654abd8ec424cf0b6083d: -9480
     d742375dcdf8c4a03897d097bd10d0b5: -10000
@@ -307,6 +332,7 @@ AudioMixerGroupController:
   m_Send: 00000000000000000000000000000000
   m_Effects:
   - {fileID: -3477494873804186198}
+  - {fileID: -4861063002198153103}
   - {fileID: 3257574306125768317}
   - {fileID: -9158176179090806435}
   m_UserColorIndex: 0

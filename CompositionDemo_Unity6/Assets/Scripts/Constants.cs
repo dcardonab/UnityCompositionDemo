@@ -24,4 +24,10 @@ public static class Constants
         {Scale.FourthPentatonic, new []{0, 3, 5, 8, 10}},
         {Scale.FifthPentatonic, new []{0, 2, 5, 7, 9}}
     };
+
+    public enum NoteGenerationMode
+    {
+        Random,     // Random notes assigned when generating grid
+        Markov      // First order Markov chain
+    }
 }

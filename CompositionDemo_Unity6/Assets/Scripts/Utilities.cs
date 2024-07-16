@@ -1,6 +1,8 @@
+using System;
 using System.Linq;
 
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public static class Utilities
 {
@@ -56,5 +58,51 @@ public static class Utilities
 
         // 10 is assumed as a reference value for computing dB
         return 20.0f * Mathf.Log10(rms * 10);
+    }
+
+    /// <summary>
+    /// The algorithm randomly chooses an index from an input float array that
+    /// contains normalized weights.
+    /// </summary>
+    /// <param name="weights"></param>
+    /// <returns>(int) Index corresponding to the chosen weight.</returns>
+    public static int WeightedRandom(float[] weights)
+    {
+        if (weights == null || weights.Length == 0)
+            return -1;
+        
+        float r = Random.value;
+        
+        if (Mathf.Approximately(r, 1.0f))
+            return Random.Range(0, weights.Length);
+        
+        float sum = 0.0f;
+
+        for (int i = 0; i < weights.Length; i++)
+        {
+            float w = weights[i];
+            
+            if (float.IsNaN(w) || w <= 0.0f)
+                continue;
+
+            sum += w;
+
+            // Subtract Epsilon as a tolerance to make floating point comparison more robust
+            if (sum >= r - Mathf.Epsilon)
+                return i;
+        }
+
+        // Function should never get here since the weights are normalized
+        return -1;
+    }
+
+    public static float[] GetRow(float[,] matrix, int rowIndex)
+    {
+        int cols = matrix.GetLength(1);
+        
+        // Iterate over every column at the given row and return array
+        return Enumerable.Range(0, cols)
+            .Select(col => matrix[rowIndex, col])
+            .ToArray();
     }
 }

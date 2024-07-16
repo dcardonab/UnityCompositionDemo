@@ -8,10 +8,11 @@ using UnityEngine.Pool;
 
 public class AudioManager : MonoBehaviour
 {
-    public static AudioManager Instance;
+    public static AudioManager Instance { get; private set; }
     
     private float[] _noteMultipliers = new float[12];
 
+    [Header("Music Generation")]
     public int[] CurrentScale;
     
     Constants.Scale _selectedScale;
@@ -29,11 +30,20 @@ public class AudioManager : MonoBehaviour
             
             _selectedScale = index;
             CurrentScale = Constants.Scales[_selectedScale];
+            
+            if (_noteGenerationMode == Constants.NoteGenerationMode.Markov)
+                // Generate transition matrix every time the scale is updated
+                _transitionMatrix = GenerateTransitionMatrix();
         }
     }
+
+    float[,] _transitionMatrix;
+    int _currentNote;
+    [SerializeField] Constants.NoteGenerationMode _noteGenerationMode = Constants.NoteGenerationMode.Markov;
     
-    bool _inTransition;
+    [Header("Interpolation")]
     public float TransitionTime = 2.0f;
+    bool _inTransition;
 
     [Header("AudioSource Settings")]
     [SerializeField] AudioClip _audioClip;
@@ -57,10 +67,13 @@ public class AudioManager : MonoBehaviour
     
     void Awake()
     {
+        // Singleton pattern
         if (Instance != null && Instance != this)
+        {
             Destroy(this);
-        else
-            Instance = this;
+            return;
+        }
+        Instance = this;
 
         AudioSourcePool = new ObjectPool<AudioSource>(
             CreatePooledAudioSource,
@@ -73,14 +86,14 @@ public class AudioManager : MonoBehaviour
         
         InitNoteMultipliers();
         InitFftBandRangeFrequencies();
+        
+        SelectedScale = Constants.Scale.Dorian;
+        
+        // Choose first note at random
+        _currentNote = Random.Range(0, _transitionMatrix.GetLength(0));
 
         Left = new AudioChannelData(_vectorSize, 0, _fftWindowType, _fftBandRangeFrequencies);
         Right = new AudioChannelData(_vectorSize, 1, _fftWindowType, _fftBandRangeFrequencies);
-    }
-    
-    void Start()
-    {
-        SelectedScale = Constants.Scale.Dorian;
     }
     
     void Update()
@@ -104,6 +117,8 @@ public class AudioManager : MonoBehaviour
     /********************* INITS *********************/
     void InitNoteMultipliers()
     {
+        // The note multipliers are computed using the 12th root of the
+        // scale step.
         float twelfthRoot = Mathf.Pow(2.0f, 1.0f / 12.0f);
 
         _noteMultipliers = _noteMultipliers
@@ -114,10 +129,10 @@ public class AudioManager : MonoBehaviour
     void InitFftBandRangeFrequencies()
     {
         float freqMin = 20.0f;
-        float freqMax = AudioSettings.outputSampleRate * 0.5f;
+        float nyquistFreq = AudioSettings.outputSampleRate * 0.5f;
         
         // Ratio for each step in logarithmic scaling
-        float ratio = Mathf.Pow(freqMax / freqMin, 1.0f / _numFftBands);
+        float ratio = Mathf.Pow(nyquistFreq / freqMin, 1.0f / _numFftBands);
 
         _fftBandRangeFrequencies = new float[_numFftBands + 1];
         _fftBandRangeFrequencies[0] = freqMin;
@@ -130,12 +145,106 @@ public class AudioManager : MonoBehaviour
             .ToArray();
     }
 
+    float[,] GenerateTransitionMatrix()
+    {
+        int rows = CurrentScale.Length;
+        int cols = CurrentScale.Length;
+        
+        float[,] transitionMatrix = new float[rows, cols];
+
+        for (int r = 0; r < rows; r++)
+        {
+            // Compute sum for normalizing probabilities to prevent normalizing
+            // during weighted random function when choosing notes.
+            float sum = 0;
+            for (int c = 0; c < cols; c++)
+            {
+                transitionMatrix[r, c] = Random.value;
+                sum += transitionMatrix[r, c];
+            }
+
+            // Normalize row.
+            if (sum > 0)
+            {
+                for (int c = 0; c < cols; c++)
+                   transitionMatrix[r, c] /= sum;
+            }
+            
+            // If the sum is 0, assign uniform distribution
+            else
+            {
+                for (int c = 0; c < cols; c++)
+                    transitionMatrix[r, c] = 1.0f / cols;
+            }
+        }
+        
+        return transitionMatrix;
+    }
+    
+    /********************* METHODS *********************/
+    public IEnumerator PlayNote(NotePlayer tilePlayer, int sourceIndex, int note, float multiplier, Collider other)
+    {
+        AudioSource source = tilePlayer.Sources[sourceIndex];
+
+        // Control loudness based on the velocity of the colliding object
+        source.volume = Utilities.Map(
+            other.attachedRigidbody.linearVelocity.magnitude,
+            0.1f, 100.0f,
+            0.1f, 1.0f,
+            1.5f,
+            true
+        );
+        
+        if (_noteGenerationMode == Constants.NoteGenerationMode.Markov)
+        {
+            // Assign current note
+            source.pitch = _noteMultipliers[CurrentScale[_currentNote]] * multiplier;
+            
+            // Retrieve note for next iteration
+            _currentNote = ChooseNextNote();
+        }
+        else
+            source.pitch = _noteMultipliers[CurrentScale[note % CurrentScale.Length]] * multiplier;
+        
+        source.PlayOneShot(source.clip);
+        
+        yield return new WaitWhile(() => source.isPlaying || _inTransition);
+
+        tilePlayer.RemoveSource(sourceIndex);
+    }
+
+    int ChooseNextNote()
+    {
+        // Retrieve probabilities corresponding to the next note
+        float[] nextNoteProbabilities = Utilities.GetRow(_transitionMatrix, _currentNote);
+        
+        // Pick next note. Next note corresponds to index in the scale.
+        return Utilities.WeightedRandom(nextNoteProbabilities);
+    }
+    
+    IEnumerator TransitionPlaybackMode(AudioSource source)
+    {
+        float initialValue = source.spatialBlend;
+        float destinationValue = 1.0f - source.spatialBlend;
+        
+        float elapsedTime = 0.0f;
+        while (elapsedTime <= TransitionTime)
+        {
+            source.spatialBlend = Mathf.Lerp(initialValue, destinationValue, elapsedTime / TransitionTime);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+    
+        // Set final value and mark transition as completed.
+        source.spatialBlend = Mathf.Round(source.spatialBlend);
+        _inTransition = false;
+    }
+
     /********************* POOL METHODS *********************/
     AudioSource CreatePooledAudioSource()
     {
         AudioSource instance = Instantiate(_audioSourcePrefab, Vector3.zero, Quaternion.identity);
         instance.gameObject.SetActive(false);
-
         return instance;
     }
     
@@ -156,46 +265,9 @@ public class AudioManager : MonoBehaviour
         Destroy(instance.gameObject);
     }
 
-    void ReleaseAudioSource(AudioSource instance)
+    public void ReleaseAudioSource(AudioSource instance)
     {
         AudioSourcePool.Release(instance);
         _activeAudioSources.Remove(instance);
-    }
-    
-    /********************* METHODS *********************/
-    public IEnumerator PlayNote(NotePlayer tilePlayer, int note, float multiplier, Transform tileTransform)
-    {
-        tilePlayer.SourceAssigned = true;
-        
-        tilePlayer.transform.position = tileTransform.position;
-        
-        tilePlayer.Source.pitch = _noteMultipliers[CurrentScale[note % CurrentScale.Length]] * multiplier;
-        tilePlayer.Source.PlayOneShot(tilePlayer.Source.clip);
-        
-        yield return new WaitWhile(() => tilePlayer.Source.isPlaying || _inTransition);
-        
-        tilePlayer.SourceAssigned = false;
-        ReleaseAudioSource(tilePlayer.Source);
-    }
-    
-    IEnumerator TransitionPlaybackMode(AudioSource source)
-    {
-        float initialValue = source.spatialBlend;
-        float destinationValue = 1.0f - source.spatialBlend;
-        
-        float elapsedTime = 0.0f;
-    
-        while (elapsedTime <= TransitionTime)
-        {
-            source.spatialBlend = Mathf.Lerp(initialValue, destinationValue, elapsedTime / TransitionTime);
-            
-            elapsedTime += Time.deltaTime;
-            
-            yield return null;
-        }
-    
-        source.spatialBlend = Mathf.Round(source.spatialBlend);
-    
-        _inTransition = false;
     }
 }

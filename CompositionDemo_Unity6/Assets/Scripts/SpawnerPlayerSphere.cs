@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class SpawnerPlayerSphere : MonoBehaviour
 {
@@ -6,10 +8,16 @@ public class SpawnerPlayerSphere : MonoBehaviour
 
     [SerializeField] Transform[] _spawnPositions;
     [SerializeField] Material[] _sphereMaterials;
+    int _colorID;
 
     [SerializeField] float _horizontalOffset = 13.0f;
     [SerializeField] float _verticalOffset = 4.0f;
-    
+
+    void Start()
+    {
+        _colorID = Shader.PropertyToID("_BaseColor");
+    }
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.UpArrow))
@@ -51,11 +59,11 @@ public class SpawnerPlayerSphere : MonoBehaviour
 
         Material material = _sphereMaterials[Random.Range(0, _sphereMaterials.Length)];
         playerSphere.GetComponent<Renderer>().material = material;
-        playerSphere.GetComponent<TrailRenderer>().material = material;
+        
+        TrailRenderer trailRenderer = playerSphere.GetComponent<TrailRenderer>(); 
+        trailRenderer.startColor = material.GetColor(_colorID);
         
         float force = Random.Range(10.0f, 50.0f);
         playerSphere.GetComponent<Rigidbody>().AddForce(direction * force, ForceMode.Impulse);
-        
-        
     }
 }
