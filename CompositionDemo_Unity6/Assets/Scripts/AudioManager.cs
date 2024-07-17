@@ -1,3 +1,12 @@
+/*
+ * Project Name: Unity Composition Demo
+ * Script Name: AudioManager.cs
+ * Description: This script contains the main audio behavior, including scale selection syntax, generation of a transition matrix for running first order Markov chains, pooling of audio sources, and note playback behavior.
+ * Author: David Cardona
+ * Date: July 17, 2024
+ * License: MIT License
+ */
+
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;

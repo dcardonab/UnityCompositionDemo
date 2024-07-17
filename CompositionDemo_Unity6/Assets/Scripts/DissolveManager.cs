@@ -1,4 +1,14 @@
+/*
+ * Project Name: Unity Composition Demo
+ * Script Name: DissolveManager.cs
+ * Description: This script handles the Dissolve effect based on keyboard input.
+ * Author: David Cardona
+ * Date: July 17, 2024
+ * License: MIT License
+ */
+
 using System.Collections;
+
 using UnityEngine;
 
 public class DissolveManager : MonoBehaviour

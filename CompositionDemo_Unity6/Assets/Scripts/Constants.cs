@@ -1,3 +1,12 @@
+/*
+ * Project Name: Unity Composition Demo
+ * Script Name: Constants.cs
+ * Description: This script defines constants used for this implementation, including scales and note generation modes.
+ * Author: David Cardona
+ * Date: July 17, 2024
+ * License: MIT License
+ */
+
 using System.Collections.Generic;
 
 public static class Constants

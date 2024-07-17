@@ -1,3 +1,12 @@
+/*
+ * Project Name: Unity Composition Demo
+ * Script Name: NoteGridGenerator.cs
+ * Description: This script generates the central tile grid based on a given number of rows and columns.
+ * Author: David Cardona
+ * Date: July 17, 2024
+ * License: MIT License
+ */
+
 using UnityEngine;
 
 public class NoteGridGenerator : MonoBehaviour

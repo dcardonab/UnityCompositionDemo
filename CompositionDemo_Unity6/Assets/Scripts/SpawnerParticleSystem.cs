@@ -1,4 +1,13 @@
-using System;
+/*
+ * Project Name: Unity Composition Demo
+ * Script Name: SpawnerParticleSystem.cs
+ * Description: This script handles particle system pooling.
+ * Author: David Cardona
+ * Date: July 17, 2024
+ * License: MIT License
+ */
+
+
 using UnityEngine;
 using UnityEngine.Pool;
 

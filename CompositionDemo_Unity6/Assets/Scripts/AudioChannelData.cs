@@ -1,3 +1,12 @@
+/*
+ * Project Name: Unity Composition Demo
+ * Script Name: AudioChannelData.cs
+ * Description: This script defines a struct to store audio channel data.
+ * Author: David Cardona
+ * Date: July 17, 2024
+ * License: MIT License
+ */
+
 using System.Linq;
 
 using UnityEngine;

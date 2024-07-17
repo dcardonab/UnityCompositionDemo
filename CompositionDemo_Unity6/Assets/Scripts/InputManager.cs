@@ -1,5 +1,13 @@
+/*
+ * Project Name: Unity Composition Demo
+ * Script Name: InputManager.cs
+ * Description: This script handles retrieving and storing the Mouse input for usage in the Rotate.cs script.
+ * Author: David Cardona
+ * Date: July 17, 2024
+ * License: MIT License
+ */
+
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class InputManager : MonoBehaviour
 {

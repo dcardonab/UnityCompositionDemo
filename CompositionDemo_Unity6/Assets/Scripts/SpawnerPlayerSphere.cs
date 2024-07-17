@@ -1,6 +1,13 @@
-using System;
+/*
+ * Project Name: Unity Composition Demo
+ * Script Name: SpawnerPlayerSphere.cs
+ * Description: This script handles the generation of spheres when pressing the arrow keys.
+ * Author: David Cardona
+ * Date: July 17, 2024
+ * License: MIT License
+ */
+
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public class SpawnerPlayerSphere : MonoBehaviour
 {

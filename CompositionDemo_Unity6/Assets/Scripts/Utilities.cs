@@ -1,4 +1,13 @@
-using System;
+/*
+ * Project Name: Unity Composition Demo
+ * Script Name: Utilities.cs
+ * Description: This script contains several mathematical utilities used across the application.
+ * Author: David Cardona
+ * Date: July 17, 2024
+ * License: MIT License
+ */
+
+
 using System.Linq;
 
 using UnityEngine;

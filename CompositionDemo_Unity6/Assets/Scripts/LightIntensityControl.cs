@@ -1,3 +1,12 @@
+/*
+ * Project Name: Unity Composition Demo
+ * Script Name: LightIntensityControl.cs
+ * Description: This script handles the relationship between light intensity and audio loudness at the listener.
+ * Author: David Cardona
+ * Date: July 17, 2024
+ * License: MIT License
+ */
+
 using UnityEngine;
 
 public class LightIntensityControl : MonoBehaviour

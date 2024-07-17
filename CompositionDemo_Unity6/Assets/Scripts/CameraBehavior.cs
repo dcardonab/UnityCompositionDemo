@@ -1,7 +1,16 @@
-using System;
+/*
+ * Project Name: Unity Composition Demo
+ * Script Name: CameraBehavior.cs
+ * Description: This script handles the camera visualization modes as well as their transition.
+ * Author: David Cardona
+ * Date: July 17, 2024
+ * License: MIT License
+ */
+
 using System.Collections;
 using UnityEngine;
 
+[RequireComponent(typeof(Camera))]
 public class CameraBehavior : MonoBehaviour
 {
     enum VisualizationMode { Overhead = 1, Center = -1 }

@@ -1,4 +1,12 @@
-using System;
+/*
+ * Project Name: Unity Composition Demo
+ * Script Name: CameraBehavior.cs
+ * Description: This script handles how particle systems will be removed from the pool.
+ * Author: David Cardona
+ * Date: July 17, 2024
+ * License: MIT License
+ */
+
 using UnityEngine;
 
 public class NoteTileParticleSystem : MonoBehaviour
@@ -10,10 +18,4 @@ public class NoteTileParticleSystem : MonoBehaviour
     {
         Disable?.Invoke(this);
     }
-
-    // private void Update()
-    // {
-    //     if (!GetComponent<ParticleSystem>().IsAlive())
-    //         OnParticleSystemStopped();
-    // }
 }

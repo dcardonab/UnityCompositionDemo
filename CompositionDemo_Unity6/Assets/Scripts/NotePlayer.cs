@@ -1,4 +1,14 @@
+/*
+ * Project Name: Unity Composition Demo
+ * Script Name: NotePlayer.cs
+ * Description: This script handles the note playing behavior of each tile.
+ * Author: David Cardona
+ * Date: July 17, 2024
+ * License: MIT License
+ */
+
 using System.Collections.Generic;
+
 using UnityEngine;
 
 public class NotePlayer : MonoBehaviour
