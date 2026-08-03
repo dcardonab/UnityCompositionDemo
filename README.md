@@ -1,18 +1,24 @@
-# Unity Composition Demo
+# Envelop
 
-This project demonstrates an immersive audiovisual instrument implemented in Unity. The majority of the project relies on procedural generation, with the exception of a single audio sample, which is used as the only audio clip. Musical generation is based on mathematical relationships to playback this sample in different tonal centers that adhere to a twelve-tone temperament system. Additionally, the project showcases audio-reactive graphics that leverage the [Shader Graph](https://docs.unity3d.com/Packages/com.unity.shadergraph@17.0/manual/index.html) Unity tool.
+Envelop is an interactive audiovisual instrument built in Unity 6. It treats a
+composition as a space of possible outcomes rather than a fixed sequence of
+events: there is no timeline and no score, only a set of relationships and a
+performer acting within them.
 
-## Requirements
+Almost everything in the piece is generated procedurally. A single audio sample
+is the only audio asset in the project. Musical material is produced by
+retuning that sample through mathematical relationships across a twelve-tone
+temperament system, so pitch, harmony, and register all emerge from one
+recording. The performer launches spheres into an enclosure, and what sounds
+depends on where they enter, how they collide, and how long they survive;
+spheres are destroyed once they come to rest or leave the enclosure.
 
-This project is making use of [Adaptive Probe Volumes](https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@17.0/manual/probevolumes-concept.html), a feature introduced in Unity 6. The project was developed using version 6000.0.4f1, and is unlikely to work properly in previous Unity versions. However, it should work smoothly with newer versions of Unity 6.
+The visual layer is driven by the same audio it accompanies. Audio-reactive
+shading built with [Shader Graph](https://docs.unity3d.com/Packages/com.unity.shadergraph@17.0/manual/index.html) responds to sound as it is generated, and
+switching camera perspective also switches the audio between 2D and 3D
+spatialization.
 
-## Opening the Project
-* Download the Unity 6 preview from the [Unity Download Archive](https://unity.com/releases/editor/archive).
-* Clone this repository.
-* In the Unity Hub, click on the **Add** button and open the root folder of the Unity project, titled *CompositionDemo_Unity6*.
-* Once Unity opens, navigate to **Assets > Scenes** in the Project pane, and double click on the *CompositionDemo* scene.
-
-## Player Controls
+## Controls
 * Arrow Keys
     * Spheres launched from different directions
     * Spheres are destroyed when still or when outside enclosure
