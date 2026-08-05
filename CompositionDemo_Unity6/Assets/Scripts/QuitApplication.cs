@@ -18,18 +18,15 @@ public class QuitApplication : MonoBehaviour
 {
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-            QuitGame();
-    }
-
-    void QuitGame()
-    {
-        #if UNITY_EDITOR
-            EditorApplication.isPlaying = false;
-        #elif UNITY_WEBGL
+    #if UNITY_WEBGL
+        if (Input.GetKeyDown(KeyCode.R))
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        #else
+    #elif UNITY_EDITOR
+        if (Input.GetKeyDown(KeyCode.Escape))
+            EditorApplication.isPlaying = false;
+    #else
+        if (Input.GetKeyDown(KeyCode.Escape))
             Application.Quit();
-        #endif
+    #endif
     }
 }
