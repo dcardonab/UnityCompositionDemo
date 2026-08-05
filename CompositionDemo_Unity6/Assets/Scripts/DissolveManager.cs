@@ -1,5 +1,5 @@
 /*
- * Project Name: Unity Composition Demo
+ * Project Name: Envelop
  * Script Name: DissolveManager.cs
  * Description: This script handles the Dissolve effect based on keyboard input.
  * Author: David Cardona

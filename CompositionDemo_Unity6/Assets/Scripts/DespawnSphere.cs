@@ -1,5 +1,5 @@
 /*
- * Project Name: Unity Composition Demo
+ * Project Name: Envelop
  * Script Name: DespawnSphere.cs
  * Description: This script handles deletion of spheres when they become still or when they fall outside the enclosure.
  * Author: David Cardona

@@ -1,5 +1,5 @@
 /*
- * Project Name: Unity Composition Demo
+ * Project Name: Envelop
  * Script Name: QuitApplication.cs
  * Description: This script handles the behavior for quitting the application when pressing the Escape key.
  * Author: David Cardona
@@ -8,6 +8,7 @@
  */
 
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
     using UnityEditor;
@@ -25,6 +26,8 @@ public class QuitApplication : MonoBehaviour
     {
         #if UNITY_EDITOR
             EditorApplication.isPlaying = false;
+        #elif UNITY_WEBGL
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         #else
             Application.Quit();
         #endif

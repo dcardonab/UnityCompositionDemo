@@ -1,5 +1,5 @@
 /*
- * Project Name: Unity Composition Demo
+ * Project Name: Envelop
  * Script Name: InputManager.cs
  * Description: This script handles retrieving and storing the Mouse input for usage in the Rotate.cs script.
  * Author: David Cardona

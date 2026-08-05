@@ -1,5 +1,5 @@
 /*
- * Project Name: Unity Composition Demo
+ * Project Name: Envelop
  * Script Name: AudioChannelData.cs
  * Description: This script defines a struct to store audio channel data.
  * Author: David Cardona

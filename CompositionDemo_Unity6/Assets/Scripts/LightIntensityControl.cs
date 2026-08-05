@@ -1,5 +1,5 @@
 /*
- * Project Name: Unity Composition Demo
+ * Project Name: Envelop
  * Script Name: LightIntensityControl.cs
  * Description: This script handles the relationship between light intensity and audio loudness at the listener.
  * Author: David Cardona

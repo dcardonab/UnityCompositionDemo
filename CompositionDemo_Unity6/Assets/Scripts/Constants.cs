@@ -1,5 +1,5 @@
 /*
- * Project Name: Unity Composition Demo
+ * Project Name: Envelop
  * Script Name: Constants.cs
  * Description: This script defines constants used for this implementation, including scales and note generation modes.
  * Author: David Cardona

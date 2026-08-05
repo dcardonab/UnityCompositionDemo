@@ -1,5 +1,5 @@
 /*
- * Project Name: Unity Composition Demo
+ * Project Name: Envelop
  * Script Name: CameraBehavior.cs
  * Description: This script handles the camera visualization modes as well as their transition.
  * Author: David Cardona

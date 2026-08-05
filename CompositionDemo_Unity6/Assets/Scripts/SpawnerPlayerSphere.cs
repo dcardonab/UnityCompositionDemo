@@ -1,5 +1,5 @@
 /*
- * Project Name: Unity Composition Demo
+ * Project Name: Envelop
  * Script Name: SpawnerPlayerSphere.cs
  * Description: This script handles the generation of spheres when pressing the arrow keys.
  * Author: David Cardona

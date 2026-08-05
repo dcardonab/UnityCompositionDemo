@@ -1,5 +1,5 @@
 /*
- * Project Name: Unity Composition Demo
+ * Project Name: Envelop
  * Script Name: Utilities.cs
  * Description: This script contains several mathematical utilities used across the application.
  * Author: David Cardona

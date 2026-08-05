@@ -1,5 +1,5 @@
 /*
- * Project Name: Unity Composition Demo
+ * Project Name: Envelop
  * Script Name: CameraBehavior.cs
  * Description: This script handles the rotation behavior for object, handling rotation in both local and world space.
  * Author: David Cardona

@@ -1,5 +1,5 @@
 /*
- * Project Name: Unity Composition Demo
+ * Project Name: Envelop
  * Script Name: SpawnerParticleSystem.cs
  * Description: This script handles particle system pooling.
  * Author: David Cardona

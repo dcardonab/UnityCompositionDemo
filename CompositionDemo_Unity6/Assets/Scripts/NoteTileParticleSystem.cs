@@ -1,5 +1,5 @@
 /*
- * Project Name: Unity Composition Demo
+ * Project Name: Envelop
  * Script Name: CameraBehavior.cs
  * Description: This script handles how particle systems will be removed from the pool.
  * Author: David Cardona

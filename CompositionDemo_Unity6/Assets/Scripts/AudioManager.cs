@@ -1,5 +1,5 @@
 /*
- * Project Name: Unity Composition Demo
+ * Project Name: Envelop
  * Script Name: AudioManager.cs
  * Description: This script contains the main audio behavior, including scale selection syntax, generation of a transition matrix for running first order Markov chains, pooling of audio sources, and note playback behavior.
  * Author: David Cardona

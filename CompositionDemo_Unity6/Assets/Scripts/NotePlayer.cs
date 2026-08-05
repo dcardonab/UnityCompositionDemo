@@ -1,5 +1,5 @@
 /*
- * Project Name: Unity Composition Demo
+ * Project Name: Envelop
  * Script Name: NotePlayer.cs
  * Description: This script handles the note playing behavior of each tile.
  * Author: David Cardona

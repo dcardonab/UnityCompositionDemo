@@ -1,5 +1,5 @@
 /*
- * Project Name: Unity Composition Demo
+ * Project Name: Envelop
  * Script Name: NoteGridGenerator.cs
  * Description: This script generates the central tile grid based on a given number of rows and columns.
  * Author: David Cardona
